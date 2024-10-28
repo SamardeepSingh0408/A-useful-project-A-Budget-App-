@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget App</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="sub-container">
+                <div class="total-amount-container">
+                    <h3>Budget</h3>
+                    <p class="hide error" id="budget-error">
+                        Value cannot be empty or negative
+                    </p>
+                    <input type="number" id="total-amount" placeholder="Enter Total Amount">
+                    <button class="submit" id="total-amount-button">Set Budget</button>
+                </div>
+                <!-- Expenditure -->
+                 <div class="user-amount-container">
+                    <h3>Expenses</h3>
+                    <p class="hide error" id="product-title-error">
+                        Values cannot be empty
+                    </p>
+                    <input type="text" class="product-title" id="product-title" placeholder="Enter Title of Product">
+                    <input type="number" id="user-amount" placeholder="Enter cost of product">
+                    <button class="submit" id="check-submit">Check Amount</button>
+                 </div>
+            </div>
+            <!--Output-->
+            <div class="output-container flex-space">
+                <div>
+                    <p>Total Budget</p>
+                    <span id="amount">0</span>
+                </div>
+                <div>
+                    <p>Expenses</p>
+                    <span id="expenditure-value">0</span>
+                </div>
+                <div>
+                    <p>Balance</p>
+                    <span id="balance-amount">0</span>
+                </div>
+            </div>
+        </div>
+        <!--List-->
+        <div class="list">
+            <h3>Expense List</h3>
+            <div class="list-container" id="list"></div>
+        </div>
+    </div>
+    <!--Script-->
+
+    <script>
+        let totalAmount = document.getElementById("total-amount");
+        let userAmount = document.getElementById("user-amount");
+        const checkAmountButton = document.getElementById("check-submit");
+        const totalAmountButton = document.getElementById("total-amount-button");
+        const productTitle = document.getElementById("product-title");
+        const errorMessage = document.getElementById("budget-error");
+        const productTitleError = document.getElementById("product-title-error");
+        const productCostError = document.getElementById("product-cost-error");
+        const amount = document.getElementById("amount");
+        const expenditureValue = document.getElementById("expenditure-value");
+        const balanceValue = document.getElementById("balance-amount");
+        const list = document.getElementById("list");
+        let tempAmount = 0;
+        totalAmountButton.addEventListener('click', function(){
+            tempAmount = parseInt(totalAmount.value);
+            if(tempAmount==='' || tempAmount <0){
+                errorMessage.classList.remove('hide');
+            }else{
+                errorMessage.classList.add('hide');
+                amount.innerHTML = tempAmount;
+                balanceValue.innerText = tempAmount - parseInt(expenditureValue.innerText);
+                totalAmount.value = '';
+            }
+        });
+        function disableButton(bool){
+            let editButtons = document.getElementsByClassName('edit');
+            Array.from(editButtons).forEach((element)=>{
+                element.disabled = bool;
+            });
+        };
+        function modifyElement(element, edit = false){
+            let parentDiv = element.parentElement;
+            let currentBalance = balanceValue.innerText;
+            let currentExpense = expenditureValue.innerText;
+            let parentAmount = parentDiv.querySelector('.amount').innerText;
+            if(edit){
+                let parentText = parentDiv.querySelector('.product').innerText;
+                productTitle.value = parentText;
+                userAmount.value = parentAmount;
+                disableButton(true);
+            }
+            balanceValue.innerText = parseInt(currentBalance) + parseInt(parentAmount);
+            expenditureValue.innerText = parseInt(currentExpense) - parseInt(parentAmount);
+            parentDiv.remove();
+        };
+        function listCreator(expenseName, expenseValue){
+            let sublistContent = document.createElement('div');
+            sublistContent.classList.add('sublist-content' ,'flex-space');
+            list.appendChild(sublistContent);
+            sublistContent.innerHTML = `<p class="product">${expenseName}</p><p class="amount">${expenseValue}</p>`;
+            let editButtons = document.createElement('button');
+            editButtons.classList.add('fa-solid', 'fa-pen-to-square', 'edit');
+            editButtons.style.fontSize = '1.2em';
+            editButtons.addEventListener('click', function(){
+                modifyElement(editButtons, true);
+            });
+            let deleleButton = document.createElement('button');
+            deleleButton.classList.add('fa-solid', 'fa-trash-can', 'delete');
+            deleleButton.style.fontSize = '1.2em';
+            deleleButton.addEventListener('click', function(){
+                modifyElement(deleleButton);
+            });
+            sublistContent.appendChild(editButtons);
+            sublistContent.appendChild(deleleButton);
+            
+        };
+            checkAmountButton.addEventListener('click', function(){
+                if(!userAmount.value || !productTitle.value){
+                    productTitleError.classList.remove('hide');
+                    return false;
+                }
+                disableButton(false);
+                let expenditure = parseInt(userAmount.value);
+                let sum = parseInt(expenditureValue.innerText)+ expenditure;
+                expenditureValue.innerText = sum;
+                const totalBalance = tempAmount - sum;
+                balanceValue.innerText = totalBalance;
+                listCreator(productTitle.value, userAmount.value);
+                productTitle.value = '';
+                userAmount.value = '';
+            });
+
+</script>
+    
+</body>
+</html>
